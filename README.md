@@ -1,6 +1,12 @@
 # Introduction
 
 -----------------------------------------> Show Image of Application Flow <----------------------------------------------------------
+TLDR;
+For Running the Application:
+In the command line type
+```
+sh sam-local.sh
+```
 
 ## Break down of Micronaut-Spring Application:
 
