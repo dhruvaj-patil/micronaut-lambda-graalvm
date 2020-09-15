@@ -1,0 +1,12 @@
+.gradle
+.vscode
+/build/*
+/gradle/*
+/native-image/*
+/reports/*
+gradlew
+gradlew.bat
+logs.txt
+emp-data
+emp-data.bat
+

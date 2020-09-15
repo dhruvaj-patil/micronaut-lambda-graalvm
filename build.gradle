@@ -1,0 +1,79 @@
+plugins {
+    id "java"
+    id "com.github.johnrengelman.shadow" version "5.0.0"
+    id "application"
+    id "net.ltgt.apt-eclipse" version "0.21"
+    id "org.springframework.boot" version "2.1.12.RELEASE"
+    id "io.spring.dependency-management" version "1.0.6.RELEASE"
+}
+
+version "0.1"
+group "graal.spring.demo"
+
+repositories {
+    mavenCentral()
+    maven { url "https://jcenter.bintray.com" }
+}
+
+configurations {
+    // for dependencies that are needed for development only
+    developmentOnly 
+}
+
+dependencies {
+    annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
+    annotationProcessor "io.micronaut:micronaut-graal"
+    annotationProcessor "io.micronaut:micronaut-inject-java"
+    annotationProcessor "io.micronaut:micronaut-validation"
+    annotationProcessor "io.micronaut.spring:micronaut-spring-boot"
+    annotationProcessor "io.micronaut.spring:micronaut-spring-boot-annotation"
+    annotationProcessor "io.micronaut.spring:micronaut-spring-web-annotation"
+    testAnnotationProcessor "io.micronaut.spring:micronaut-spring-web-annotation"
+
+    compileOnly "com.oracle.substratevm:svm" //Provides SubstrateVM which includes runtime components like he deoptimizer, garbage collector, thread scheduling etc. The resulting program has faster startup time and lower runtime memory overhead compared to a Java VM. We pass values to args to the native-image using the file native-image.properties to finetune the native-image generation.
+    implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
+    implementation "io.micronaut:micronaut-http-client"
+    implementation "io.micronaut:micronaut-inject"
+    implementation "io.micronaut:micronaut-validation"
+    implementation "io.micronaut:micronaut-runtime" //micronaut runtime gives us io.micronaut.function.aws.runtime.MicronautLambdaRuntime(native-image.properties) for running the application on aws Lambda
+
+    // To deploy your Micronaut function as a GraalVM Native Image you need to select a custom runtime. -> https://micronaut-projects.github.io/micronaut-aws/latest/guide/index.html#applicationtyperuntimedependencies
+    implementation("io.micronaut.aws:micronaut-function-aws-custom-runtime:1.3.2") { //for using custom runtime on aws lambda. A runtime is a program that runs a Lambda function’s handler method when the function is invoked. You can include a runtime in your function’s deployment package in the form of an executable file named bootstrap
+        exclude group: "com.fasterxml.jackson.module", module: "jackson-module-afterburner"
+    }
+    implementation("io.micronaut.aws:micronaut-function-aws-api-proxy:1.3.2") { // for using aws-api-proxy 
+        exclude group: "com.fasterxml.jackson.module", module: "jackson-module-afterburner"
+    }
+    developmentOnly "io.micronaut:micronaut-http-server-netty"
+    runtimeOnly "ch.qos.logback:logback-classic:1.2.3"
+    testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
+    testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+    testImplementation platform("io.micronaut:micronaut-bom:$micronautVersion")
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "io.micronaut.test:micronaut-test-junit5"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+
+    // spring support
+    compile("org.springframework.boot:spring-boot-starter-web")
+    runtime("io.micronaut.spring:micronaut-spring-boot:1.0.1")
+    runtime("io.micronaut.spring:micronaut-spring-web:1.0.1")
+}
+
+test.classpath += configurations.developmentOnly
+
+mainClassName = "graal.spring.demo.Application"
+// use JUnit 5 platform
+test {
+    useJUnitPlatform()
+}
+
+shadowJar {
+    mergeServiceFiles()
+}
+
+run.classpath += configurations.developmentOnly
+run.jvmArgs('-noverify', '-XX:TieredStopAtLevel=1', '-Dcom.sun.management.jmxremote')
+tasks.withType(JavaCompile){
+    options.encoding = "UTF-8"
+    options.compilerArgs.add('-parameters')
+}

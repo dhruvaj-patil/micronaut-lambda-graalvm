@@ -1,0 +1,6 @@
+micronaut:
+  application:
+    name: emp-data
+jackson:
+  serialization:
+    indentOutput: true
