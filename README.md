@@ -1,14 +1,30 @@
 # Introduction
 
 -----------------------------------------> Show Image of Application Flow <----------------------------------------------------------
+
+
 TLDR;
-For Running the Application:
+You can Download the Project by cloning this this repo [https://github.com/dhruvaj-patil/micronaut-lambda-graalvm.git](https://github.com/dhruvaj-patil/micronaut-lambda-graalvm)
+
+**For Running the Application Locally**:
 In the command line type
 ```
 sh sam-local.sh
 ```
 
-## Break down of Micronaut-Spring Application:
+**For Deploying it on Cloud**:
+
+```
+aws s3 mb s3://<s3-bucket-name>
+
+aws cloudformation package --template-file sam-native.yaml  --output-template-file packaged-sam.yaml --s3-bucket <s3-bucket-name>
+
+aws cloudformation deploy --template-file ./packaged-sam.yaml  --stack-name <stack-name> --capabilities CAPABILITY_IAM
+
+```
+
+
+## Break down of Application:
 
 ### Main Class File:
 
@@ -497,8 +513,3 @@ Args = -H:IncludeResources=application.yml|log4j2.xml \
 ```
 
  **-H:Class=io.micronaut.function.aws.runtime.MicronautLambdaRuntime**: Provides us with MicronautRuntime to Run the application on Lambda
-
-
-
-
-### Running the Application on AWS Lambda & Local Docker Container.

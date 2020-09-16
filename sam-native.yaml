@@ -23,8 +23,8 @@ Resources:
             Method: any
 
 Outputs:
-  MicronautNativeServiceApi:
+  EmpGraalServiceApi:
     Description: URL for application
     Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/emp'
     Export:
-      Name: MicronautNativeServiceApi
+      Name: EmpGraalServiceApi
